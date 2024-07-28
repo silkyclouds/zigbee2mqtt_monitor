@@ -43,7 +43,7 @@ Follow these steps to set up the script:
 1. **Clone the repository**:
 
     ```bash
-    git clone https://github.com/yourusername/zigbee2mqtt-monitor.git
+    git clone https://github.com/silkyclouds/zigbee2mqtt-monitor.git
     cd zigbee2mqtt-monitor
     ```
 
