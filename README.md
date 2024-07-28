@@ -71,8 +71,6 @@ Follow these steps to set up the script:
 
 You can run the script manually or set it up as a systemd service for automatic startup:
 
-## Manual Run
-
 ```bash
 python zigbee2mqtt_monitor.py
 
