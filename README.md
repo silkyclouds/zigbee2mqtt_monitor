@@ -75,3 +75,54 @@ You can run the script manually or set it up as a systemd service for automatic 
 
 ```bash
 python zigbee2mqtt_monitor.py
+
+### Systemd Service
+
+To run the script as a systemd service, follow these steps:
+
+1. **Create a service file**:
+
+    ```bash
+    sudo nano /etc/systemd/system/zigbee2mqtt_monitor.service
+    ```
+
+2. **Add the following configuration to the service file**:
+
+    ```ini
+    [Unit]
+    Description=Zigbee2MQTT Monitor Service
+    After=network.target
+
+    [Service]
+    User=root
+    WorkingDirectory=/path/to/your/zigbee2mqtt_monitor
+    ExecStart=/path/to/your/zigbee2mqtt_monitor/venv/bin/python /path/to/your/zigbee2mqtt_monitor/zigbee2mqtt_monitor.py
+    Restart=always
+
+    [Install]
+    WantedBy=multi-user.target
+    ```
+
+    Replace `/path/to/your/zigbee2mqtt_monitor` with the actual path to your script directory.
+
+3. **Reload systemd, enable, and start the service**:
+
+    ```bash
+    sudo systemctl daemon-reload
+    sudo systemctl enable zigbee2mqtt_monitor.service
+    sudo systemctl start zigbee2mqtt_monitor.service
+    sudo systemctl status zigbee2mqtt_monitor.service
+    ```
+
+## Usage
+
+Once the script is running, it will automatically monitor your Zigbee2MQTT devices, perform backups, and send notifications based on the configuration settings. If a specified number of devices go offline, the script will restart the necessary services and notify you via Discord.
+
+## Contributing
+
+Contributions are welcome! If you find a bug or have a feature request, please open an issue or submit a pull request on GitHub.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
+
