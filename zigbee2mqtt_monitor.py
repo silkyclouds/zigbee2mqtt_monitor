@@ -24,7 +24,7 @@ config = {
     "notification_interval": 300,  # Time between notifications in seconds
     "uptime_threshold": 300,  # Uptime threshold for zigbee2mqtt restart in seconds
     "offline_device_threshold": 10,  # Number of offline devices to trigger restart
-    "check_interval": 1,  # Interval for checking container status in seconds
+    "check_interval": 10,  # Interval for checking container status in seconds
     "backup_time": "01:45"  # Time for daily backup
 }
 
@@ -37,14 +37,20 @@ offline_devices_initial = set()
 notification_queue = defaultdict(list)
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected to MQTT broker with result code " + str(rc))
+    print(f"Connected to MQTT broker with result code {rc}")
     client.subscribe(config["zigbee2mqtt_topic"])
 
 def on_message(client, userdata, msg):
     global device_states
     topic = msg.topic
-    payload = json.loads(msg.payload)
+    try:
+        payload = json.loads(msg.payload)
+    except json.JSONDecodeError as e:
+        print(f"Failed to decode JSON message: {e}")
+        return
+
     if 'state' in payload:
+        print(f"Received message: {payload}")
         device_states[topic] = payload['state']
         if topic in offline_devices_initial:
             offline_devices_initial.remove(topic)
@@ -55,11 +61,13 @@ def on_message(client, userdata, msg):
 
 def check_device_status():
     offline_devices = sum(1 for state in device_states.values() if state == 'offline')
+    print(f"Offline devices count: {offline_devices}")
     if offline_devices > config["offline_device_threshold"]:
         if check_zigbee2mqtt_uptime():
             urgent_notification_and_restart_services(offline_devices)
 
 def send_discord_notification(message, urgent=False):
+    print(f"Sending Discord notification: {message}")
     if urgent:
         data = {'content': f'```diff\n- {message}\n```'}
     else:
@@ -139,46 +147,4 @@ def monitor_containers():
 
 def main():
     # Perform initial check and backup
-    initial_check_and_backup()
-
-    # Start the MQTT client in a separate thread
-    mqtt_client = mqtt.Client()
-    mqtt_client.username_pw_set(config["mqtt_user"], config["mqtt_password"])
-    mqtt_client.on_connect = on_connect
-    mqtt_client.on_message = on_message
-
-    mqtt_thread = threading.Thread(target=mqtt_client.connect, args=(config["mqtt_broker"], config["mqtt_port"], 60))
-    mqtt_thread.daemon = True
-    mqtt_thread.start()
-
-    mqtt_client.loop_start()
-
-    # Start the notification processing thread
-    process_notifications()
-
-    # Start the container monitoring thread
-    container_monitoring_thread = threading.Thread(target=monitor_containers)
-    container_monitoring_thread.daemon = True
-    container_monitoring_thread.start()
-
-    # Get initial offline devices and send notification
-    while not device_states:
-        time.sleep(1)
-
-    for device, state in device_states.items():
-        if state == 'offline':
-            offline_devices_initial.add(device)
-
-    if offline_devices_initial:
-        initial_offline_message = "```diff\n- Initial offline devices:\n" + "\n".join(offline_devices_initial) + "\n```"
-        send_discord_notification(initial_offline_message)
-
-    # Schedule the backup job
-    schedule.every().day.at(config["backup_time"]).do(backup_and_upload)
-
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-if __name__ == "__main__":
-    main()
+    initial_c
