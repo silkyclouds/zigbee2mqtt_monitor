@@ -9,6 +9,15 @@ This script is designed to monitor the state of Zigbee2MQTT (Z2M) devices, autom
 - Notifies you via Discord about device statuses (online/offline).
 - Automatically restarts Zigbee2MQTT and Mosquitto services if a specified number of devices go offline.
 
+## Prerequisites
+
+Before running this script, ensure you have the following:
+
+- A Discord webhook URL for notifications.
+- Docker installed and running.
+- Containers named `zigbee2mqtt` and `mosquitto`. If your containers have different names, modify the script accordingly.
+- An MQTT broker (e.g., Mosquitto) set up and running.
+
 ## Configuration
 
 The script uses a configuration dictionary to manage its settings. You can adjust the following parameters:
@@ -31,19 +40,26 @@ The script uses a configuration dictionary to manage its settings. You can adjus
 
 Follow these steps to set up the script:
 
-1. Create a virtual environment:
+1. **Clone the repository**:
 
     ```bash
-    python3 -m venv /home/meaning/scripts/venv
+    git clone https://github.com/yourusername/zigbee2mqtt-monitor.git
+    cd zigbee2mqtt-monitor
     ```
 
-2. Activate the virtual environment:
+2. **Create a virtual environment**:
 
     ```bash
-    source /home/meaning/scripts/venv/bin/activate
+    python3 -m venv venv
     ```
 
-3. Install the required dependencies:
+3. **Activate the virtual environment**:
+
+    ```bash
+    source venv/bin/activate
+    ```
+
+4. **Install the required dependencies**:
 
     ```bash
     pip install schedule requests docker paho-mqtt
@@ -56,4 +72,4 @@ You can run the script manually or set it up as a systemd service for automatic 
 ### Manual Run
 
 ```bash
-python /home/meaning/scripts/zigbee2mqtt_monitor.py
+python zigbee2mqtt_monitor.py
