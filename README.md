@@ -76,7 +76,7 @@ You can run the script manually or set it up as a systemd service for automatic 
 ```bash
 python zigbee2mqtt_monitor.py
 
-### Systemd Service
+## Systemd Service
 
 To run the script as a systemd service, follow these steps:
 
